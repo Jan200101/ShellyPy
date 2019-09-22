@@ -28,6 +28,7 @@ setuptools.setup(
     packages=["ShellyPy"],
     license="MIT",
     install_requires=requirements,
+    include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
