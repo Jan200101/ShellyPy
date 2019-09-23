@@ -22,6 +22,7 @@ setuptools.setup(
     name="ShellyPy",
     version=version,
     author="Jan Drögehoff",
+    author_email="jandroegehoff@gmail.com",
     description="Wrapper around the Shelly HTTP api",
     long_description=long_description,
     long_description_content_type="text/markdown",
