@@ -137,6 +137,14 @@ class Shelly:
         except JSONDecodeError:
             raise BadResponse("Bad JSON")
 
+    def status(self):
+        """
+        @brief      returns status response
+
+        @return     status dict
+        """
+        return self.post("update")
+
     def settings(self, subpage = None):
         """
         @brief      returns settings
@@ -214,7 +222,7 @@ class Shelly:
         if duration is not None:
             values["duration"] = duration
 
-        return self.post("roller/{index}".format(index), values)
+        return self.post("roller/{}".format(index), values)
 
     def light(self, index, *args, **kwargs):
 
@@ -273,8 +281,8 @@ class Shelly:
         if brightness is not None:
             values["brightness"] = brightness
 
-        return self.post("light/{index}".format(index), values)
+        return self.post("light/{}".format(index), values)
 
-    def emeter(self, i, *args, **kwargs):
-        #TODO
-        return
+    def emeter(self, index, *args, **kwargs):
+
+        return self.post("emeter/{}".format(index))
