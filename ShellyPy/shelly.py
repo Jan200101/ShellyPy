@@ -1,5 +1,10 @@
-from typing import Union, List, Dict
-from json.decoder import JSONDecodeError
+from sys import version_info
+
+if version_info.major == 3:
+    from json.decoder import JSONDecodeError
+else:
+    JSONDecodeError = ValueError
+
 
 from requests import post
 from requests.auth import HTTPBasicAuth
@@ -7,7 +12,7 @@ from requests.auth import HTTPBasicAuth
 from .error import *
 
 
-def confirm_ip(ip: Union[str, List[str], List[int]]) -> bool:
+def confirm_ip(ip):
     """
     @brief      Confirm IPv4 adress
 
@@ -37,7 +42,7 @@ def confirm_ip(ip: Union[str, List[str], List[int]]) -> bool:
 
 class Shelly:
 
-    def __init__(self, ip: Union[str, List[str], List[int]], port: Union[str, int] = "80", *, login: Dict[str, str]=None, **kwargs):
+    def __init__(self, ip, port = "80", *args, **kwargs):
         """
         @param      ip     	the target IP of the shelly device. Can be a string, list of strings or list of integers
         @param      port        target port, may be useful for non Shelly devices that have the same HTTP Api
@@ -55,8 +60,7 @@ class Shelly:
         if not confirm_ip(ip):
             raise MalformedIP("IP is is malformed or not IPv4")
 
-        if login is None:
-            login = {}
+        login = kwargs.get("login", {})
 
         if isinstance(ip, list):
             self.__ip__ = ".".join([str(val) for val in ip])
@@ -73,7 +77,7 @@ class Shelly:
         self.update()
 
     def __repr__(self):
-        return f"<{self.__name__} {self.__type__} ({self.__ip__})>"
+        return "<{} {} ({})>".format(self.__name__, self.__type__, self.__ip__)
 
     def __str__(self):
         return str(self.__name__)
@@ -100,7 +104,7 @@ class Shelly:
 
         self.__emeter__ = status.get("emeter", [])
 
-    def post(self, page: str, values: Dict[str, Union[str, int]]=None) -> dict:
+    def post(self, page, values = None):
         """
         @brief      returns settings
 
@@ -109,10 +113,10 @@ class Shelly:
         @return     returns json response
         """
 
-        url = f"{self.__PROTOCOL__}://{self.__ip__}:{self.__port__}/{page}?"
+        url = "{}://{}:{}/{}?".format(self.__PROTOCOL__, self.__ip__, self.__port__, page)
 
         if values:
-            url += "&".join([f"{key}={value}" for key, value in values.items()])
+            url += "&".join(["{}={}".format(key, value) for key, value in values.items()])
 
         if self.__debugging__:
             print("Target Adress: {}\n"
@@ -133,7 +137,7 @@ class Shelly:
         except JSONDecodeError:
             raise BadResponse("Bad JSON")
 
-    def settings(self, subpage: str = None) -> dict:
+    def settings(self, subpage = None):
         """
         @brief      returns settings
 
@@ -148,7 +152,7 @@ class Shelly:
 
         return self.post(page)
 
-    def relay(self, index: int, *, turn: bool = None, timer: float = None) -> dict:
+    def relay(self, index, *args, **kwargs):
         """
         @brief      Interacts with a relay at the given index
 
@@ -160,6 +164,9 @@ class Shelly:
 
         values = {}
 
+        turn = kwargs.get("turn", None)
+        timer = kwargs.get("timer", None)
+
         if turn is not None:
             if turn:
                 values["turn"] = "on"
@@ -169,10 +176,9 @@ class Shelly:
         if timer:
             values["timer"] = timer
 
-        return self.post(f"relay/{index}", values)
+        return self.post("relay/{}".format(index), values)
 
-    def roller(self, index: int, *, go: str = None,
-               roller_pos: float = None, duration: float = None) -> dict:
+    def roller(self, index, *args, **kwargs):
         """
         @brief      Interacts with a roller at a given index
 
@@ -183,7 +189,11 @@ class Shelly:
         @param      duration    how long it will take to get to that position
         """
 
-        def clamp_percentage(val: int):
+        go = kwargs.get("go", None)
+        roller_pos = kwargs.get("roller_pos", None)
+        duration = kwargs.get("duration", None)
+
+        def clamp_percentage(val):
             """
             clamp given percentage to a range from 0 to 100
             """
@@ -204,13 +214,22 @@ class Shelly:
         if duration is not None:
             values["duration"] = duration
 
-        return self.post(f"roller/{index}", values)
+        return self.post("roller/{index}".format(index), values)
 
-    def light(self, index: int, *, mode: str = None, timer: int = None, turn: bool = None,
-              red: int = None, green: int = None, blue: int = None, white: int = None,
-              gain: int = None, temp: int = None, brightness: int = None) -> dict:
+    def light(self, index, *args, **kwargs):
 
-        def clamp(val: int) -> int:
+        mode = kwargs.get("mode", None)
+        timer = kwargs.get("timer", None)
+        turn = kwargs.get("turn", None)
+        red = kwargs.get("red", None)
+        green = kwargs.get("green", None)
+        blue = kwargs.get("blue", None)
+        white = kwargs.get("white", None)
+        gain = kwargs.get("gain", None)
+        temp = kwargs.get("temp", None)
+        brightness = kwargs.get("brightness", None)
+
+        def clamp(val):
             """clamp any number to 8 bit"""
             if val > 255:
                 val = 255
@@ -254,8 +273,8 @@ class Shelly:
         if brightness is not None:
             values["brightness"] = brightness
 
-        return self.post(f"light/{index}", values)
+        return self.post("light/{index}".format(index), values)
 
-    def emeter(self, i: int, *args, **kwargs):
+    def emeter(self, i, *args, **kwargs):
         #TODO
         return
