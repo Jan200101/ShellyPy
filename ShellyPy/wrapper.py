@@ -12,34 +12,6 @@ from requests.auth import HTTPBasicAuth
 from .error import *
 
 
-def confirm_ip(ip):
-    """
-    @brief      Confirm IPv4 adress
-
-    @param      ip    IP given as either a string or List containing strings or integers
-
-    @return     returns True if ip is valid
-    """
-
-    if isinstance(ip, str):
-        ip = ip.split(".")
-        if len(ip) != 4:
-            return False
-
-    if isinstance(ip, list):
-        for value in ip:
-            if isinstance(value, str):
-                try:
-                    value = int(value)
-                except ValueError:
-                    value = 256
-            if value > 255 or value < 0:
-                return False
-        return True
-
-    return False
-
-
 class Shelly:
 
     def __init__(self, ip, port = "80", *args, **kwargs):
@@ -56,9 +28,6 @@ class Shelly:
         self.__debugging__ = kwargs.get("debug", None)
 
         self.__PROTOCOL__ = "http"
-
-        if not confirm_ip(ip):
-            raise MalformedIP("IP is is malformed or not IPv4")
 
         login = kwargs.get("login", {})
 
@@ -95,11 +64,9 @@ class Shelly:
         self.__roller__ = status.get("rollers", [])
         self.__light__ = status.get("lights", [])
 
-        # documentation for the Shelly Sense is very weird
-        # FIXME
+        # FIXME documentation for the Shelly Sense is very weird
         self.__ir__ = status.get("ir", [])
-        # There isn't even an example of the response for the RGBW
-        # FIXME
+        # FIXME There isn't even an example of the response for the RGBW
         self.__color__ = status.get("color", [])
 
         self.__emeter__ = status.get("emeter", [])

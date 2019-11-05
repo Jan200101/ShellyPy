@@ -6,4 +6,5 @@ device = ShellyPy.Shelly("192.168.0.5")
 
 device.relay(0, turn=True) # turn the relay at index 0 on
 device.relay(0, turn=False) # same as bove but turn it off
-# Shelly 1 devices only have 1 relay
+device.relay(0, turn=True, delay=3) # turn the relay 0 on for 3 seconds then off
+# most shelly devices only have 1 or 2 relays

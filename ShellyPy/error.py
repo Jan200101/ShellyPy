@@ -1,11 +1,4 @@
 
-class MalformedIP(Exception):
-    """
-    Exception for malformed IPv4 adresses
-    """
-    pass
-
-
 class BadLogin(Exception):
     """
     Exception for bad login details
