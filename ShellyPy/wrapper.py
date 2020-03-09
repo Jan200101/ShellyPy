@@ -110,7 +110,7 @@ class Shelly:
 
         @return     status dict
         """
-        return self.post("update")
+        return self.post("status")
 
     def settings(self, subpage = None):
         """
