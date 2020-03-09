@@ -51,6 +51,38 @@ class Shelly:
     def __str__(self):
         return str(self.__name__)
 
+    @staticmethod
+    def __clamp__(val):
+        """clamp any number to 8 bit"""
+        if val > 255:
+            val = 255
+        elif val < 0:
+            val = 0
+
+        return val
+
+    @staticmethod
+    def __clamp_percentage__(val):
+        """
+        clamp given percentage to a range from 0 to 100
+        """
+        if val > 100:
+            val = 100
+        elif val < 0:
+            val = 0
+        return val
+
+    @staticmethod
+    def __clamp_kalvin__(val):
+        """
+        clamp given kalvin values for a range from 3000..6500
+        """
+        if val > 6500:
+            val = 6500
+        elif val < 3000:
+            val = 3000
+        return val
+
     def update(self):
         """
         @brief update the Shelly attributes
@@ -131,7 +163,6 @@ class Shelly:
         """
         @brief      Interacts with a relay at the given index
 
-        @param      self   The object
         @param      index  index of the relay
         @param      turn   Will turn the relay on or off
         @param      timer  a one-shot flip-back timer in seconds
@@ -168,23 +199,13 @@ class Shelly:
         roller_pos = kwargs.get("roller_pos", None)
         duration = kwargs.get("duration", None)
 
-        def clamp_percentage(val):
-            """
-            clamp given percentage to a range from 0 to 100
-            """
-            if val > 100:
-                val = 100
-            elif val < 0:
-                val = 0
-            return val
-
         values = {}
 
         if go:
             values["go"] = go
 
         if roller_pos is not None:
-            values["roller_pos"] = clamp_percentage(roller_pos)
+            values["roller_pos"] = self.__clamp_percentage__(roller_pos)
 
         if duration is not None:
             values["duration"] = duration
@@ -192,7 +213,21 @@ class Shelly:
         return self.post("roller/{}".format(index), values)
 
     def light(self, index, *args, **kwargs):
+        """
+        @brief      Interacts with lights at a given index
 
+        @param      mode        Accepts "white" and "color" as possible modes
+        @param      index       index of the light. When in doubt use 0
+        @param      timer       a one-shot flip-back timer in seconds
+        @param      turn        Will turn the lights on or off
+        @param      red         Red brightness, 0..255, only works if mode="color"
+        @param      green       Green brightness, 0..255, only works if mode="color"
+        @param      blue        Blue brightness, 0..255, only works if mode="color"
+        @param      white       White brightness, 0..255, only works if mode="color"
+        @param      gain        Gain for all channels, 0...100, only works if mode="color"
+        @param      temp        Color temperature in K, 3000..6500, only works if mode="white"
+        @param      brightness  Brightness, 0..100, only works if mode="white"
+        """
         mode = kwargs.get("mode", None)
         timer = kwargs.get("timer", None)
         turn = kwargs.get("turn", None)
@@ -203,15 +238,6 @@ class Shelly:
         gain = kwargs.get("gain", None)
         temp = kwargs.get("temp", None)
         brightness = kwargs.get("brightness", None)
-
-        def clamp(val):
-            """clamp any number to 8 bit"""
-            if val > 255:
-                val = 255
-            elif val < 0:
-                val = 0
-
-            return val
 
         values = {}
 
@@ -228,25 +254,25 @@ class Shelly:
                 values["turn"] = "off"
 
         if red is not None:
-            values["red"] = clamp(red)
+            values["red"] = self.__clamp__(red)
 
         if green is not None:
-            values["green"] = clamp(green)
+            values["green"] = self.__clamp__(green)
 
         if blue is not None:
-            values["blue"] = clamp(blue)
+            values["blue"] = self.__clamp__(blue)
 
         if white is not None:
-            values["white"] = clamp(white)
+            values["white"] = self.__clamp__(white)
 
         if gain is not None:
-            values["gain"] = clamp(gain)
+            values["gain"] = self.__clamp_percentage__(gain)
 
         if temp is not None:
-            values["temp"] = temp
+            values["temp"] = self.__clamp_kalvin__(temp)
 
         if brightness is not None:
-            values["brightness"] = brightness
+            values["brightness"] = self.__clamp_percentage__(brightness)
 
         return self.post("light/{}".format(index), values)
 
