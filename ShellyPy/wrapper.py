@@ -9,7 +9,7 @@ else:
 from requests import post
 from requests.auth import HTTPBasicAuth
 
-from .error import *
+import error
 
 
 class Shelly:
@@ -92,16 +92,15 @@ class Shelly:
         self.__type__ = status['device']['type']
         self.__name__ = status['device']['hostname']
 
-        self.__relay__ = status.get("relays", [])
-        self.__roller__ = status.get("rollers", [])
-        self.__light__ = status.get("lights", [])
+        # Settings are already fetched to get device information might as well put the list of things the device has somewhere
+        self.relays = status.get("relays", [])
+        self.rollers = status.get("rollers", [])
+        # RGBW reuses the same lights array
+        self.lights = status.get("lights", [])
 
-        # FIXME documentation for the Shelly Sense is very weird
-        self.__ir__ = status.get("ir", [])
-        # FIXME There isn't even an example of the response for the RGBW
-        self.__color__ = status.get("color", [])
+        self.irs = status.get("light_sensor", None)
 
-        self.__emeter__ = status.get("emeter", [])
+        self.emeters = status.get("emeter", [])
 
     def post(self, page, values = None):
         """
@@ -127,14 +126,14 @@ class Shelly:
                         timeout=self.__timeout__)
 
         if response.status_code == 401:
-            raise BadLogin()
+            raise error.BadLogin()
         elif response.status_code == 404:
-            raise NotFound("Not Found")
+            raise error.NotFound("Not Found")
 
         try:
             return response.json()
         except JSONDecodeError:
-            raise BadResponse("Bad JSON")
+            raise error.BadResponse("Bad JSON")
 
     def status(self):
         """
