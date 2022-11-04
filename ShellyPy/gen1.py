@@ -101,6 +101,17 @@ class ShellyGen1(ShellyBase):
             page += "/" + subpage
 
         return self.post(page)
+    
+    
+   def meter(self, index):
+        """
+        @brief      Get meter information from a relay at the given index
+
+        @param      index  index of the relay
+        @return     returns attributes of meter: power, overpower, is_valid, timestamp, counters, total
+        """
+
+        return self.post("meter/{}meter".format(index))
 
     def relay(self, index, *args, **kwargs):
         """
