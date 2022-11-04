@@ -94,6 +94,9 @@ class ShellyBase:
     def settings(self, subpage = None):
         raise NotImplementedError("Base Class")
 
+    def meter(self, index):
+        raise NotImplementedError("Base Class")
+        
     def relay(self, index, *args, **kwargs):
         raise NotImplementedError("Base Class")
 

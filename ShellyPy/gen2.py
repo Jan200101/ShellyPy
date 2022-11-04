@@ -76,6 +76,9 @@ class ShellyGen2(ShellyBase):
     def settings(self, subpage = None):
         return self.post("Sys.GetConfig")
 
+    def meter(self, index):
+        raise NotImplementedError("Unavailable")
+
     def relay(self, index, *args, **kwargs):
 
         values = {
