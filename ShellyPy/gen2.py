@@ -25,6 +25,7 @@ class ShellyGen2(ShellyBase):
 
         super().__init__(ip, port, *args, **kwargs)
         self.__generation__ = 2
+        self.payload_id = 1
 
     def update(self):
         status = self.settings()
@@ -35,8 +36,14 @@ class ShellyGen2(ShellyBase):
     def post(self, page, values = None):
         url = "{}://{}:{}/rpc".format(self.__PROTOCOL__, self.__ip__, self.__port__)
 
+        # increment payload id globally
+        self.payload_id += 1
+        # but keep a local copy around so we face no race conditions
+        payload_id = self.payload_id
+
         payload = {
-            "id": 1,
+            "jsonrpc": "2.0",
+            "id": payload_id,
             "method": page,
         }
 
@@ -67,6 +74,9 @@ class ShellyGen2(ShellyBase):
                 raise NotFound(error_message)
             else:
                 raise BadResponse("{}: {}".format(error_code, error_message))
+
+        if response_data["id"] != payload_id:
+            raise BadResponse("invalid payload id was returned")
 
         return response_data.get("result", {})
 
