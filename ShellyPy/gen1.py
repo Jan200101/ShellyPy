@@ -27,7 +27,7 @@ class ShellyGen1(ShellyBase):
         super().__init__(ip, port, *args, **kwargs)
         self.__generation__ = 1
 
-    def update(self, index = 0):
+    def update(self):
         """
         @brief update the Shelly attributes
 
@@ -48,8 +48,16 @@ class ShellyGen1(ShellyBase):
 
         self.emeters = status.get("emeter", [])
 
-        # Request meter information
-        self.meter = self.meter(index)
+        self.meters = []
+        meter_index = 0
+        # Meters are not returned as part of the settings
+        while True:
+            try:
+                # Request meter information
+                self.meter.append(self.meter(meter_index))
+                meter_index += 1
+            except:
+                break
 
     def post(self, page, values = None):
         """
