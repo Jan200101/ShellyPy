@@ -7,8 +7,9 @@ Python 2 and 3 Wrapper around the Shelly HTTP api
 other packages like [pyShelly](https://github.com/StyraHem/pyShelly) only support CoAP or MSQT, neither I am comfortable with using in personal projects
 
 
-## example
-here is a simple working example for the Shelly 1 that turns a relay on
+## examples
+#### relay
+a simple working example for the Shelly 1 that turns a relay on 
 ```python
 import ShellyPy
 
@@ -16,7 +17,20 @@ device = ShellyPy.Shelly("192.168.0.5")
 
 device.relay(0, turn=True)
 ```
-this example with comments can be found on [examples/toggle_relay.py](examples/toggle_relay.py)
+[examples/toggle_relay.py](examples/toggle_relay.py)
+
+#### monitor
+a simple working example for the Shelly 1 that request monitor information 
+```python
+import ShellyPy
+
+device = ShellyPy.Shelly("192.168.68.121")
+
+deviceMeter = device.meter(0)   #request meter information
+print(deviceMeter['power'])     #print power information
+print(deviceMeter['total'])     #print total information
+```
+other examples are available as well [examples/meter.py](examples/meter.py)
 
 ## devices
 #### supported

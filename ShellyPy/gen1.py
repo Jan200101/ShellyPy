@@ -17,7 +17,7 @@ class ShellyGen1(ShellyBase):
     def __init__(self, ip, port = "80", *args, **kwargs):
         """
         @param      ip      the target IP of the shelly device. Can be a string, list of strings or list of integers
-        @param      port        target port, may be useful for non Shelly devices that have the same HTTP Api
+        @param      port    target port, may be useful for non Shelly devices that have the same HTTP Api
         @param      login   dict of login credentials. Keys needed are "username" and "password"
         @param      timeout specify the amount of time until requests are aborted.
         @param      debug   enable debug printing
@@ -27,9 +27,11 @@ class ShellyGen1(ShellyBase):
         super().__init__(ip, port, *args, **kwargs)
         self.__generation__ = 1
 
-    def update(self):
+    def update(self, index = 0):
         """
         @brief update the Shelly attributes
+
+        @param     index  index of the relay
         """
         status = self.settings()
 
@@ -45,6 +47,9 @@ class ShellyGen1(ShellyBase):
         self.irs = status.get("light_sensor", None)
 
         self.emeters = status.get("emeter", [])
+
+        # Request meter information
+        self.meter = self.meter(index)
 
     def post(self, page, values = None):
         """
