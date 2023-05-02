@@ -107,6 +107,32 @@ class ShellyGen1(ShellyBase):
 
         return self.post(page)
 
+    def setsettings(self, *args, **kwargs):
+        """
+        @brief      Set device settings. Only max_power
+
+        @param      max_power           Power threshold above which an overpower condition will be triggered. Any value >2500 will be set to device maximum 2500
+        @param      led_status_disable  Disable LED status indication
+        """
+
+        values = {}
+        max_power = kwargs.get("max_power", None)
+        led_status_disable = kwargs.get("led_status_disable", None)
+
+        if max_power is not None:
+            if max_power > 2500:
+                values["max_power"] = 2500
+            else:
+                values["max_power"] = max_power
+
+        if led_status_disable is not None:
+            if led_status_disable:
+                values["led_status_disable"] = True
+            else:
+                values["led_status_disable"] = False
+
+        return self.post("settings/", values)
+
     def meter(self, index):
         """
         @brief      Get meter information from a relay at the given index
@@ -116,6 +142,16 @@ class ShellyGen1(ShellyBase):
         """
 
         return self.post("meter/{}".format(index))
+
+    def temperatur(self, index):
+        """
+        @brief      PlugS only internal device temperature in °C
+
+        @param      index  index of the relay
+        @return     returns the temperatur
+        """
+
+        return self.post("temperature/{}".format(index))
 
     def relay(self, index, *args, **kwargs):
         """

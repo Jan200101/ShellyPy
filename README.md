@@ -32,6 +32,18 @@ print(deviceMeter['total'])     #print total information
 ```
 other examples are available as well [examples/meter.py](examples/meter.py)
 
+
+#### settings
+a simple working example for the Shelly 1 to set settings.
+```python
+import ShellyPy
+
+device = ShellyPy.Shelly("192.168.68.121")
+device.setsettings(max_power=2500, led_status_disable=True)
+```
+
+
+
 ## devices
 #### supported
 - Shelly1
