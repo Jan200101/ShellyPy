@@ -1,0 +1,3 @@
+
+class InvalidTimer(Exception):
+    pass
