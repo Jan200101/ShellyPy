@@ -5,8 +5,6 @@ if version_info.major == 3:
 else:
     JSONDecodeError = ValueError
 
-from requests.auth import HTTPBasicAuth
-
 class ShellyBase:
 
     def __init__(self, ip, port = "80", *args, **kwargs):
@@ -37,7 +35,7 @@ class ShellyBase:
 
         self.__timeout__ = kwargs.get("timeout", 5)
 
-        self.__credentials__ = HTTPBasicAuth(
+        self.__credentials__ = (
             login.get("username", ""), login.get("password", "")
         )
 

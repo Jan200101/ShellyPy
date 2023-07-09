@@ -7,6 +7,7 @@ else:
 
 
 from requests import post
+from requests.auth import HTTPBasicAuth
 
 from .error import BadLogin, NotFound, BadResponse
 
@@ -77,9 +78,11 @@ class ShellyGen1(ShellyBase):
             print("Target Adress: {}\n"
                   "Authentication: {}\n"
                   "Timeout: {}"
-                  "".format(url, any(self.__credentials__.username + self.__credentials__.password), self.__timeout__))
+                  "".format(url, any(self.__credentials__), self.__timeout__))
 
-        response = post(url, auth=self.__credentials__,
+        credentials = HTTPBasicAuth(*self.__credentials__)
+
+        response = post(url, auth=credentials,
                         timeout=self.__timeout__)
 
         if response.status_code == 401:

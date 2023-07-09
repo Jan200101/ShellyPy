@@ -6,6 +6,7 @@ else:
     JSONDecodeError = ValueError
 
 from requests import post
+from requests.auth import HTTPDigestAuth
 
 from .error import BadLogin, NotFound, BadResponse
 
@@ -50,7 +51,13 @@ class ShellyGen2(ShellyBase):
         if values:
             payload["params"] = values
 
-        response = post(url, auth=self.__credentials__,
+        credentials = None
+        try:
+            credentials = auth=HTTPDigestAuth('admin', self.__credentials__[1])
+        except IndexError:
+            pass
+
+        response = post(url, auth=credentials,
                         json=payload,
                         timeout=self.__timeout__)
 
