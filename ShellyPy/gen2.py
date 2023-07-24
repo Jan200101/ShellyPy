@@ -24,9 +24,9 @@ class ShellyGen2(ShellyBase):
         @param      init    calls the update method on init
         """
 
+        self.payload_id = 1
         super().__init__(ip, port, *args, **kwargs)
         self.__generation__ = 2
-        self.payload_id = 1
 
     def update(self):
         status = self.settings()
