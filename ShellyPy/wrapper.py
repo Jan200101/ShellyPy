@@ -5,7 +5,7 @@ if version_info.major == 3:
 else:
     JSONDecodeError = ValueError
 
-from requests import post
+from requests import get
 
 from .error import BadLogin, NotFound, BadResponse
 
@@ -29,7 +29,7 @@ class Shelly():
     def __detect__(self, ip, port):
         url = "{}://{}:{}/shelly".format("http", ip, port)
 
-        response = post(url, timeout=5)
+        response = get(url, timeout=5)
 
         if response.status_code == 401:
             raise BadLogin()
