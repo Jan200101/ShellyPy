@@ -1,4 +1,4 @@
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 from .wrapper import Shelly
 from .gen1 import ShellyGen1
