@@ -30,7 +30,7 @@ deviceMeter = device.meter(0)   #request meter information
 print(deviceMeter['power'])     #print power information
 print(deviceMeter['total'])     #print total information
 ```
-other examples are available as well [examples/meter.py](examples/meter.py)
+other examples are available as well [examples/meter.py](examples/meter.py), [examples/control_shelly_plug.py](examples/control_shelly_plug.py)
 
 ## devices
 #### supported
@@ -40,6 +40,7 @@ other examples are available as well [examples/meter.py](examples/meter.py)
 - Shelly2.5
 - Shelly4Pro (untested)
 - Shelly Plug (untested)
+- Shelly Plug Plus US (tested)
 - Shelly PlugS (untested)
 - Shelly Bulb (untested)
 - Shelly H&T (untested)
