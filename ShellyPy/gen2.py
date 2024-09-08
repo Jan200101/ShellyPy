@@ -138,7 +138,7 @@ class ShellyGen2(ShellyBase):
 
         if roller_pos is not None:
             method = "Cover.GoToPosition"
-            values["pos"] = self.__clamp_percentage__(roller_pos)
+            values["pos"] = self._clamp_percentage(roller_pos)
 
         if duration is not None:
             values["duration"] = duration

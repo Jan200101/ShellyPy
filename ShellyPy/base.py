@@ -46,7 +46,7 @@ class ShellyBase:
         return self._name
 
     @staticmethod
-    def __clamp__(val):
+    def _clamp(val: int) -> int:
         """clamp any number to 8 bit"""
         if val > 255:
             val = 255
@@ -56,7 +56,7 @@ class ShellyBase:
         return val
 
     @staticmethod
-    def __clamp_percentage__(val):
+    def _clamp_percentage(val: int) -> int:
         """
         clamp given percentage to a range from 0 to 100
         """
@@ -67,9 +67,9 @@ class ShellyBase:
         return val
 
     @staticmethod
-    def __clamp_kalvin__(val):
+    def _clamp_kelvin(val: int) -> int:
         """
-        clamp given kalvin values for a range from 3000..6500
+        clamp given kelvin values for a range from 3000..6500
         """
         if val > 6500:
             val = 6500

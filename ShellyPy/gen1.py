@@ -164,7 +164,7 @@ class ShellyGen1(ShellyBase):
             values["go"] = go
 
         if roller_pos is not None:
-            values["roller_pos"] = self.__clamp_percentage__(roller_pos)
+            values["roller_pos"] = self._clamp_percentage(roller_pos)
 
         if duration is not None:
             values["duration"] = duration
@@ -213,25 +213,25 @@ class ShellyGen1(ShellyBase):
                 values["turn"] = "off"
 
         if red is not None:
-            values["red"] = self.__clamp__(red)
+            values["red"] = self._clamp(red)
 
         if green is not None:
-            values["green"] = self.__clamp__(green)
+            values["green"] = self._clamp(green)
 
         if blue is not None:
-            values["blue"] = self.__clamp__(blue)
+            values["blue"] = self._clamp(blue)
 
         if white is not None:
-            values["white"] = self.__clamp__(white)
+            values["white"] = self._clamp(white)
 
         if gain is not None:
-            values["gain"] = self.__clamp_percentage__(gain)
+            values["gain"] = self._clamp_percentage(gain)
 
         if temp is not None:
-            values["temp"] = self.__clamp_kalvin__(temp)
+            values["temp"] = self._clamp_kelvin(temp)
 
         if brightness is not None:
-            values["brightness"] = self.__clamp_percentage__(brightness)
+            values["brightness"] = self._clamp_percentage(brightness)
 
         return self.post(f"light/{index}", values)
 
