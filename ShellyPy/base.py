@@ -14,36 +14,36 @@ class ShellyBase:
         @param      init    calls the update method on init
         """
 
-        self.__name__ = "Unknown"
-        self.__type__ = "Unknown"
-        self.__generation__ = 0
+        self._name = "Unknown"
+        self._type = "Unknown"
+        self._generation = 0
 
-        self.__debugging__ = kwargs.get("debug", None)
+        self._debugging = kwargs.get("debug", None)
 
-        self.__PROTOCOL__ = "http"
+        self._proto = "http"
 
         login = kwargs.get("login", {})
 
         # hostname would be more fitting,
         # but backwards compatibility
-        self.__ip__ = ip
+        self._hostname = ip
 
-        self.__port__ = port
+        self._port = port
 
-        self.__timeout__ = kwargs.get("timeout", 5)
+        self._timeout = kwargs.get("timeout", 5)
 
-        self.__credentials__ = (
+        self._credentials = (
             login.get("username", ""), login.get("password", "")
         )
 
         if kwargs.get("init"):
             self.update()
 
-    def __repr__(self):
-        return "<{} {} Gen {} ({})>".format(self.__name__, self.__type__, self.__generation__, self.__ip__)
+    def __repr__(self) -> str:
+        return f"<{self._name} {self._type} Gen {self._generation} ({self._hostname})>"
 
-    def __str__(self):
-        return str(self.__name__)
+    def __str__(self) -> str:
+        return self._name
 
     @staticmethod
     def __clamp__(val):

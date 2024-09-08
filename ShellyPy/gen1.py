@@ -21,7 +21,7 @@ class ShellyGen1(ShellyBase):
         """
 
         super().__init__(ip, port, *args, **kwargs)
-        self.__generation__ = 1
+        self._generation = 1
 
     def update(self) -> None:
         """
@@ -29,8 +29,8 @@ class ShellyGen1(ShellyBase):
         """
         status = self.settings()
 
-        self.__type__ = status['device'].get("type", self.__type__)
-        self.__name__ = status['device'].get("hostname", self.__name__)
+        self._type = status['device'].get("type", self._type)
+        self._name = status['device'].get("hostname", self._name)
 
         # Settings are already fetched to get device information might as well put the list of things the device has somewhere
         self.relays = status.get("relays", [])
@@ -62,18 +62,18 @@ class ShellyGen1(ShellyBase):
         @return     returns json response
         """
 
-        url = f"{self.__PROTOCOL__}://{self.__ip__}:{self.__port__}/{page}?"
+        url = f"{self._proto}://{self._hostname}:{self._port}/{page}?"
 
         if values:
             url += "&".join([f"{key}={value}" for key, value in values.items()])
 
-        if self.__debugging__:
-            print(f"Target Address: {url}\nAuthentication: {any(self.__credentials__)}\nTimeout: {self.__timeout__}")
+        if self._debugging:
+            print(f"Target Address: {url}\nAuthentication: {any(self._credentials)}\nTimeout: {self._timeout}")
 
-        credentials = HTTPBasicAuth(*self.__credentials__)
+        credentials = HTTPBasicAuth(*self._credentials)
 
         response = post(url, auth=credentials,
-                        timeout=self.__timeout__)
+                        timeout=self._timeout)
 
         if response.status_code == 401:
             raise BadLogin()

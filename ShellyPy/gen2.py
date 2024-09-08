@@ -27,11 +27,11 @@ class ShellyGen2(ShellyBase):
     def update(self) -> None:
         status = self.settings()
 
-        self.__name__ = status["device"].get("name", self.__name__)
-        self.__type__ = status["device"].get("mac", self.__type__)
+        self._name = status["device"].get("name", self._name)
+        self._type = status["device"].get("mac", self._type)
 
     def post(self, page, values = None):
-        url = f"{self.__PROTOCOL__}://{self.__ip__}:{self.__port__}/rpc"
+        url = f"{self._proto}://{self._hostname}:{self._port}/rpc"
 
         # increment payload id globally
         self.payload_id += 1
@@ -49,13 +49,13 @@ class ShellyGen2(ShellyBase):
 
         credentials = None
         try:
-            credentials = HTTPDigestAuth('admin', self.__credentials__[1])
+            credentials = HTTPDigestAuth('admin', self._credentials[1])
         except IndexError:
             pass
 
         response = post(url, auth=credentials,
                         json=payload,
-                        timeout=self.__timeout__)
+                        timeout=self._timeout)
 
         if response.status_code == 401:
             raise BadLogin()
