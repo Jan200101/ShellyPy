@@ -4,7 +4,8 @@ from abc import abstractmethod
 
 class ShellyBase:
 
-    def __init__(self, ip: str, port: int = 80, *args, **kwargs) -> None:
+    def __init__(self, ip: str, port: int = 80, timeout: int = 5,
+                 login: Optional[dict[str, str]] = None, debug: bool = False, init: bool = False) -> None:
         """
         @param      ip      the target IP of the shelly device. Can be a string, list of strings or list of integers
         @param      port    target port, may be useful for non Shelly devices that have the same HTTP Api
@@ -14,29 +15,19 @@ class ShellyBase:
         @param      init    calls the update method on init
         """
 
-        self._name = "Unknown"
-        self._type = "Unknown"
-        self._generation = 0
+        self._name: str = "Unknown"
+        self._type: str = "Unknown"
+        self._generation: int = 0
 
-        self._debugging = kwargs.get("debug", None)
+        self._proto: str = "http"
+        self._hostname: str = ip  # hostname would be more fitting, but backwards compatibility
+        self._port: int = port
+        self._timeout: int = timeout
+        self._credentials: tuple[str, str] = (login.get("username", ""),
+                                              login.get("password", "")) if login is not None else ("", "")
 
-        self._proto = "http"
-
-        login = kwargs.get("login", {})
-
-        # hostname would be more fitting,
-        # but backwards compatibility
-        self._hostname = ip
-
-        self._port = port
-
-        self._timeout = kwargs.get("timeout", 5)
-
-        self._credentials = (
-            login.get("username", ""), login.get("password", "")
-        )
-
-        if kwargs.get("init"):
+        self._debugging: bool = debug
+        if init:
             self.update()
 
     def __repr__(self) -> str:
@@ -82,7 +73,7 @@ class ShellyBase:
         ...
 
     @abstractmethod
-    def post(self, page, values = None):
+    def post(self, page: str, values = None):
         ...
 
     @abstractmethod
@@ -94,7 +85,7 @@ class ShellyBase:
         ...
 
     @abstractmethod
-    def meter(self, index):
+    def meter(self, index: int):
         ...
 
     @abstractmethod

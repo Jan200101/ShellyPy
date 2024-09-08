@@ -12,7 +12,8 @@ from .gen2 import ShellyGen2
 
 class Shelly:
 
-    def __init__(self, ip: str, port: int = 80, *args, **kwargs) -> None:
+    def __init__(self, ip: str, port: int = 80, timeout: int = 5,
+                 login: Optional[dict[str, str]] = None, debug: bool = False, init: bool = False) -> None:
         """
         @param      ip      the target IP of the shelly device. Can be a string, list of strings or list of integers
         @param      port    target port, may be useful for non Shelly devices that have the same HTTP Api
@@ -22,7 +23,8 @@ class Shelly:
         @param      init    calls the update method on init
         """
 
-        self._instance = self.__detect(ip, port)(ip, port, *args, **kwargs)
+        self._instance: ShellyBase = self.__detect(ip, port)(ip=ip, port=port, timeout=timeout,
+                                                             login=login, debug=debug, init=init)
 
     @staticmethod
     def __detect(ip: str, port: int, proto: str = 'http') -> Type[ShellyBase]:
@@ -36,7 +38,7 @@ class Shelly:
             raise NotFound("Not Found")
 
         try:
-            response_data = response.json()
+            response_data: dict[str, Any] = response.json()
         except JSONDecodeError:
             raise BadResponse("Bad JSON")
 

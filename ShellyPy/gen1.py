@@ -10,7 +10,8 @@ from .base import ShellyBase
 
 class ShellyGen1(ShellyBase):
 
-    def __init__(self, ip: str, port: int = 80, *args, **kwargs) -> None:
+    def __init__(self, ip: str, port: int = 80, timeout: int = 5,
+                 login: Optional[dict[str, str]] = None, debug: bool = False, init: bool = False) -> None:
         """
         @param      ip      the target IP of the shelly device. Can be a string, list of strings or list of integers
         @param      port    target port, may be useful for non Shelly devices that have the same HTTP Api
@@ -20,8 +21,17 @@ class ShellyGen1(ShellyBase):
         @param      init    calls the update method on init
         """
 
-        super().__init__(ip, port, *args, **kwargs)
-        self._generation = 1
+        super().__init__(ip=ip, port=port, timeout=timeout, login=login, debug=debug, init=init)
+        self._generation: int = 1
+
+        self.relays: list = []
+        self.rollers: list = []
+        self.lights: list = []
+
+        self.irs = None
+
+        self.emeters: list = []
+        self.meters: list[dict] = []
 
     def update(self) -> None:
         """
@@ -48,12 +58,12 @@ class ShellyGen1(ShellyBase):
         while True:
             try:
                 # Request meter information
-                self.meter.append(self.meter(meter_index))
+                self.meters.append(self.meter(meter_index))
                 meter_index += 1
             except Exception:
                 break
 
-    def post(self, page, values = None):
+    def post(self, page: str, values = None):
         """
         @brief      returns settings
 
@@ -108,7 +118,7 @@ class ShellyGen1(ShellyBase):
 
         return self.post(page)
 
-    def meter(self, index):
+    def meter(self, index: int):
         """
         @brief      Get meter information from a relay at the given index
 
