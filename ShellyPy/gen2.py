@@ -1,11 +1,12 @@
+from typing import Optional
 from json.decoder import JSONDecodeError
 
 from requests import post
 from requests.auth import HTTPDigestAuth
 
 from .error import BadLogin, NotFound, BadResponse
-
 from .base import ShellyBase
+
 
 class ShellyGen2(ShellyBase):
 
@@ -19,18 +20,18 @@ class ShellyGen2(ShellyBase):
         @param      init    calls the update method on init
         """
 
-        self.payload_id = 1
         super().__init__(ip, port, *args, **kwargs)
+        self.payload_id = 1
         self.__generation__ = 2
 
-    def update(self):
+    def update(self) -> None:
         status = self.settings()
 
         self.__name__ = status["device"].get("name", self.__name__)
         self.__type__ = status["device"].get("mac", self.__type__)
 
     def post(self, page, values = None):
-        url = "{}://{}:{}/rpc".format(self.__PROTOCOL__, self.__ip__, self.__port__)
+        url = f"{self.__PROTOCOL__}://{self.__ip__}:{self.__port__}/rpc"
 
         # increment payload id globally
         self.payload_id += 1
@@ -48,7 +49,7 @@ class ShellyGen2(ShellyBase):
 
         credentials = None
         try:
-            credentials = auth=HTTPDigestAuth('admin', self.__credentials__[1])
+            credentials = HTTPDigestAuth('admin', self.__credentials__[1])
         except IndexError:
             pass
 
@@ -75,7 +76,7 @@ class ShellyGen2(ShellyBase):
             elif error_code == 404:
                 raise NotFound(error_message)
             else:
-                raise BadResponse("{}: {}".format(error_code, error_message))
+                raise BadResponse(f"{error_code}: {error_message}")
 
         if response_data["id"] != payload_id:
             raise BadResponse("invalid payload id was returned")

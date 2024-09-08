@@ -1,11 +1,12 @@
+from typing import Optional
 from json.decoder import JSONDecodeError
 
 from requests import post
 from requests.auth import HTTPBasicAuth
 
 from .error import BadLogin, NotFound, BadResponse
-
 from .base import ShellyBase
+
 
 class ShellyGen1(ShellyBase):
 
@@ -22,11 +23,9 @@ class ShellyGen1(ShellyBase):
         super().__init__(ip, port, *args, **kwargs)
         self.__generation__ = 1
 
-    def update(self):
+    def update(self) -> None:
         """
         @brief update the Shelly attributes
-
-        @param     index  index of the relay
         """
         status = self.settings()
 
@@ -51,28 +50,25 @@ class ShellyGen1(ShellyBase):
                 # Request meter information
                 self.meter.append(self.meter(meter_index))
                 meter_index += 1
-            except:
+            except Exception:
                 break
 
     def post(self, page, values = None):
         """
         @brief      returns settings
 
-        @param      page   page to be accesed. Use the Shelly HTTP API Reference to see whats possible
+        @param      page    page to be accessed. Use the Shelly HTTP API Reference to see what's possible
 
         @return     returns json response
         """
 
-        url = "{}://{}:{}/{}?".format(self.__PROTOCOL__, self.__ip__, self.__port__, page)
+        url = f"{self.__PROTOCOL__}://{self.__ip__}:{self.__port__}/{page}?"
 
         if values:
-            url += "&".join(["{}={}".format(key, value) for key, value in values.items()])
+            url += "&".join([f"{key}={value}" for key, value in values.items()])
 
         if self.__debugging__:
-            print("Target Adress: {}\n"
-                  "Authentication: {}\n"
-                  "Timeout: {}"
-                  "".format(url, any(self.__credentials__), self.__timeout__))
+            print(f"Target Address: {url}\nAuthentication: {any(self.__credentials__)}\nTimeout: {self.__timeout__}")
 
         credentials = HTTPBasicAuth(*self.__credentials__)
 
@@ -101,7 +97,7 @@ class ShellyGen1(ShellyBase):
         """
         @brief      returns settings
 
-        @param      page   page to be accesed. Use the Shelly HTTP API Reference to see whats possible
+        @param      subpage page to be accessed. Use the Shelly HTTP API Reference to see what's possible
 
         @return     returns settings as a dict
         """
@@ -120,7 +116,7 @@ class ShellyGen1(ShellyBase):
         @return     returns attributes of meter: power, overpower, is_valid, timestamp, counters, total
         """
 
-        return self.post("meter/{}".format(index))
+        return self.post(f"meter/{index}")
 
     def relay(self, index, *args, **kwargs):
         """
@@ -145,7 +141,7 @@ class ShellyGen1(ShellyBase):
         if timer:
             values["timer"] = timer
 
-        return self.post("relay/{}".format(index), values)
+        return self.post(f"relay/{index}", values)
 
     def roller(self, index, *args, **kwargs):
         """
@@ -173,7 +169,7 @@ class ShellyGen1(ShellyBase):
         if duration is not None:
             values["duration"] = duration
 
-        return self.post("roller/{}".format(index), values)
+        return self.post(f"roller/{index}", values)
 
     def light(self, index, *args, **kwargs):
         """
@@ -237,11 +233,11 @@ class ShellyGen1(ShellyBase):
         if brightness is not None:
             values["brightness"] = self.__clamp_percentage__(brightness)
 
-        return self.post("light/{}".format(index), values)
+        return self.post(f"light/{index}", values)
 
     def emeter(self, index, *args, **kwargs):
 
-        return self.post("emeter/{}".format(index))
+        return self.post(f"emeter/{index}")
 
 # backwards compatibility with old code
 Shelly = ShellyGen1

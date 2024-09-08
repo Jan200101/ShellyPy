@@ -1,14 +1,14 @@
+from typing import Any, Optional, Type
 from json.decoder import JSONDecodeError
-from typing import Any, Type
 
 from requests import get
 from requests import Response
 
 from .base import ShellyBase
 from .error import BadLogin, NotFound, BadResponse
-
 from .gen1 import ShellyGen1
 from .gen2 import ShellyGen2
+
 
 class Shelly:
 
