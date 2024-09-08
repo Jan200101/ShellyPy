@@ -1,35 +1,34 @@
-from sys import version_info
-
-if version_info.major == 3:
-    from json.decoder import JSONDecodeError
-else:
-    JSONDecodeError = ValueError
+from json.decoder import JSONDecodeError
+from typing import Any, Type
 
 from requests import get
+from requests import Response
 
+from .base import ShellyBase
 from .error import BadLogin, NotFound, BadResponse
 
 from .gen1 import ShellyGen1
 from .gen2 import ShellyGen2
 
-class Shelly():
+class Shelly:
 
-    def __init__(self, ip, port = "80", *args, **kwargs):
+    def __init__(self, ip: str, port: int = 80, *args, **kwargs) -> None:
         """
         @param      ip      the target IP of the shelly device. Can be a string, list of strings or list of integers
-        @param      port        target port, may be useful for non Shelly devices that have the same HTTP Api
+        @param      port    target port, may be useful for non Shelly devices that have the same HTTP Api
         @param      login   dict of login credentials. Keys needed are "username" and "password"
         @param      timeout specify the amount of time until requests are aborted.
         @param      debug   enable debug printing
         @param      init    calls the update method on init
         """
 
-        self._instance = self.__detect__(ip, port)(ip, port, *args, **kwargs)
+        self._instance = self.__detect(ip, port)(ip, port, *args, **kwargs)
 
-    def __detect__(self, ip, port):
-        url = "{}://{}:{}/shelly".format("http", ip, port)
+    @staticmethod
+    def __detect(ip: str, port: int, proto: str = 'http') -> Type[ShellyBase]:
+        url: str = f"{proto}://{ip}:{port}/shelly"
 
-        response = get(url, timeout=5)
+        response: Response = get(url, timeout=5)
 
         if response.status_code == 401:
             raise BadLogin()
@@ -41,20 +40,20 @@ class Shelly():
         except JSONDecodeError:
             raise BadResponse("Bad JSON")
 
-        gen = response_data.get("gen", 1)
+        gen: int = response_data.get("gen", 1)
         
         if gen == 1:
             return ShellyGen1
         elif gen == 2:
             return ShellyGen2
         else:
-            raise ValueError("Generation {} not supported".format(gen))
+            raise ValueError(f"Generation {gen} not supported")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__getattr__("__repr__")()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__getattr__("__str__")()
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         return getattr(self._instance, name)

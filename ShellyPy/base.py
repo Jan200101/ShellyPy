@@ -1,13 +1,9 @@
-from sys import version_info
+from abc import abstractmethod
 
-if version_info.major == 3:
-    from json.decoder import JSONDecodeError
-else:
-    JSONDecodeError = ValueError
 
 class ShellyBase:
 
-    def __init__(self, ip, port = "80", *args, **kwargs):
+    def __init__(self, ip: str, port: int = 80, *args, **kwargs) -> None:
         """
         @param      ip      the target IP of the shelly device. Can be a string, list of strings or list of integers
         @param      port    target port, may be useful for non Shelly devices that have the same HTTP Api
@@ -80,29 +76,38 @@ class ShellyBase:
             val = 3000
         return val
 
-    def update(self):
-        raise NotImplementedError("Base Class")
+    @abstractmethod
+    def update(self) -> None:
+        ...
 
+    @abstractmethod
     def post(self, page, values = None):
-        raise NotImplementedError("Base Class")
+        ...
 
+    @abstractmethod
     def status(self):
-        raise NotImplementedError("Base Class")
+        ...
 
+    @abstractmethod
     def settings(self, subpage = None):
-        raise NotImplementedError("Base Class")
+        ...
 
+    @abstractmethod
     def meter(self, index):
-        raise NotImplementedError("Base Class")
-        
+        ...
+
+    @abstractmethod
     def relay(self, index, *args, **kwargs):
-        raise NotImplementedError("Base Class")
+        ...
 
+    @abstractmethod
     def roller(self, index, *args, **kwargs):
-        raise NotImplementedError("Base Class")
+        ...
 
+    @abstractmethod
     def light(self, index, *args, **kwargs):
-        raise NotImplementedError("Base Class")
-        
+        ...
+
+    @abstractmethod
     def emeter(self, index, *args, **kwargs):
-        raise NotImplementedError("Base Class")
+        ...

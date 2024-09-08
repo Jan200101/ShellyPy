@@ -1,9 +1,4 @@
-from sys import version_info
-
-if version_info.major == 3:
-    from json.decoder import JSONDecodeError
-else:
-    JSONDecodeError = ValueError
+from json.decoder import JSONDecodeError
 
 from requests import post
 from requests.auth import HTTPDigestAuth
@@ -14,7 +9,7 @@ from .base import ShellyBase
 
 class ShellyGen2(ShellyBase):
 
-    def __init__(self, ip, port = "80", *args, **kwargs):
+    def __init__(self, ip: str, port: int = 80, *args, **kwargs) -> None:
         """
         @param      ip      the target IP of the shelly device. Can be a string, list of strings or list of integers
         @param      port        target port, may be useful for non Shelly devices that have the same HTTP Api
