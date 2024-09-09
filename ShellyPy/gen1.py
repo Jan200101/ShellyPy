@@ -73,7 +73,7 @@ class ShellyGen1(ShellyBase):
         @return     returns json response
         """
 
-        url = f"{self._proto}://{self._hostname}:{self._port}/{page}?"
+        url: str = f"{self._proto}://{self._hostname}:{self._port}/{page}?"
 
         if values:
             url += "&".join([f"{key}={value}" for key, value in values.items()])
@@ -127,7 +127,7 @@ class ShellyGen1(ShellyBase):
 
         return self.post(f"meter/{index}")
 
-    def relay(self, index, *args, **kwargs) -> dict[str, Any]:
+    def relay(self, index: int, timer: float = 0.0, turn: Optional[bool] = None)  -> dict[str, Any]:
         """
         @brief      Interacts with a relay at the given index
 
@@ -138,16 +138,13 @@ class ShellyGen1(ShellyBase):
 
         values: dict[str, Any] = {}
 
-        turn = kwargs.get("turn", None)
-        timer = kwargs.get("timer", None)
-
         if turn is not None:
             if turn:
                 values["turn"] = "on"
             else:
                 values["turn"] = "off"
 
-        if timer:
+        if timer > 0.0:
             values["timer"] = timer
 
         return self.post(f"relay/{index}", values)

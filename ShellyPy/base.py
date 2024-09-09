@@ -89,7 +89,7 @@ class ShellyBase:
         ...
 
     @abstractmethod
-    def relay(self, index, *args, **kwargs) -> dict[str, Any]:
+    def relay(self, index: int, timer: float = 0.0, turn: Optional[bool] = None) -> dict[str, Any]:
         ...
 
     @abstractmethod

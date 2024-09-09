@@ -89,14 +89,12 @@ class ShellyGen2(ShellyBase):
     def meter(self, index: int) -> dict[str, Any]:
         raise NotImplementedError("Unavailable")
 
-    def relay(self, index, *args, **kwargs) -> dict[str, Any]:
+    def relay(self, index: int, timer: float = 0.0, turn: Optional[bool] = None) -> dict[str, Any]:
 
-        values = {
-            "id": index
-        }
+        values: dict[str, Any] = {"id": index}
 
-        turn = kwargs.get("turn", None)
-        timer = kwargs.get("timer", None)
+        if timer > 0.0:
+            values["toggle_after"] = timer
 
         if turn is not None:
             method = "Switch.Set"
@@ -106,8 +104,6 @@ class ShellyGen2(ShellyBase):
             else:
                 values["on"] = False
 
-            if timer:
-                values["toggle_after"] = timer
         else:
             method = "Switch.GetStatus"
 
@@ -121,7 +117,7 @@ class ShellyGen2(ShellyBase):
             "id": index
         }
 
-        if go:
+        if go is not None:
             if go == "open":
                 method = "Cover.Open"
             elif go == "close":
