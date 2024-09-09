@@ -43,7 +43,7 @@ class Shelly:
             raise BadResponse("Bad JSON")
 
         gen: int = response_data.get("gen", 1)
-        
+
         if gen == 1:
             return ShellyGen1
         elif gen == 2:
@@ -52,10 +52,10 @@ class Shelly:
             raise ValueError(f"Generation {gen} not supported")
 
     def __repr__(self) -> str:
-        return self.__getattr__("__repr__")()
+        return self._instance.__repr__()
 
     def __str__(self) -> str:
-        return self.__getattr__("__str__")()
+        return self._instance.__str__()
 
     def __getattr__(self, name: str) -> Any:
-        return getattr(self._instance, name)
+        return self._instance.__getattribute__(name)
