@@ -34,19 +34,19 @@ class ShellyGen2(ShellyBase):
         self._type: str = status["device"].get("mac", self._type)
 
     def post(self, page: str, values: Optional[dict[str, Any]] = None) -> dict[str, Any]:
-        url = f"{self._proto}://{self._hostname}:{self._port}/rpc"
+        url: str = f"{self._proto}://{self._hostname}:{self._port}/rpc"
 
         # increment payload id globally
         self.payload_id += 1
         # but keep a local copy around so we face no race conditions
-        payload_id = self.payload_id
+        payload_id: int = self.payload_id
 
         payload: dict[str, Any] = {"jsonrpc": "2.0", "id": payload_id, "method": page}
 
         if values:
             payload["params"] = values
 
-        credentials = None
+        credentials: Optional[HTTPDigestAuth] = None
         try:
             credentials = HTTPDigestAuth('admin', self._credentials[1])
         except IndexError:
@@ -60,13 +60,13 @@ class ShellyGen2(ShellyBase):
             raise NotFound("Not Found")
 
         try:
-            response_data = response.json()
+            response_data: dict[str, Any] = response.json()
         except JSONDecodeError:
             raise BadResponse("Bad JSON")
 
         if "error" in response_data:
-            error_code = response_data["error"].get("code", None)
-            error_message = response_data["error"].get("message", "")
+            error_code: Optional[int] = response_data["error"].get("code", None)
+            error_message: str = response_data["error"].get("message", "")
 
             if error_code == 401:
                 raise BadLogin(error_message)
@@ -92,7 +92,7 @@ class ShellyGen2(ShellyBase):
     def relay(self, index: int, timer: float = 0.0, turn: Optional[bool] = None) -> dict[str, Any]:
 
         values: dict[str, Any] = {"id": index}
-
+        method: str = "Switch.GetStatus"
         if timer > 0.0:
             values["toggle_after"] = timer
 
@@ -103,9 +103,6 @@ class ShellyGen2(ShellyBase):
                 values["on"] = True
             else:
                 values["on"] = False
-
-        else:
-            method = "Switch.GetStatus"
 
         return self.post(method, values)
 
