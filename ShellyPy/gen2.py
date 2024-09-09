@@ -33,7 +33,7 @@ class ShellyGen2(ShellyBase):
         self._name: str = name if name is not None else "Device name not yet set!"
         self._type: str = status["device"].get("mac", self._type)
 
-    def post(self, page: str, values: Optional[dict[str, Any]] = None):
+    def post(self, page: str, values: Optional[dict[str, Any]] = None) -> dict[str, Any]:
         url = f"{self._proto}://{self._hostname}:{self._port}/rpc"
 
         # increment payload id globally
@@ -80,16 +80,16 @@ class ShellyGen2(ShellyBase):
 
         return response_data.get("result", {})
 
-    def status(self):
+    def status(self) -> dict[str, Any]:
         return self.post("Sys.GetStatus")
 
-    def settings(self, subpage = None):
+    def settings(self, subpage = None) -> dict[str, Any]:
         return self.post("Sys.GetConfig")
 
-    def meter(self, index: int):
+    def meter(self, index: int) -> dict[str, Any]:
         raise NotImplementedError("Unavailable")
 
-    def relay(self, index, *args, **kwargs):
+    def relay(self, index, *args, **kwargs) -> dict[str, Any]:
 
         values = {
             "id": index
@@ -114,7 +114,7 @@ class ShellyGen2(ShellyBase):
         return self.post(method, values)
 
     def roller(self, index: int, go: Optional[str] = None,
-               roller_pos: Optional[int] = None, duration: Optional[int] = None):
+               roller_pos: Optional[int] = None, duration: Optional[int] = None) -> dict[str, Any]:
 
         method: str = ""
         values: dict[str, Any] = {
@@ -143,8 +143,8 @@ class ShellyGen2(ShellyBase):
     def light(self, index: int, mode: Optional[str] = None, timer: Optional[int] = None, turn: Optional[bool] = None,
               red: Optional[int] = None, green: Optional[int] = None, blue: Optional[int] = None,
               white: Optional[int] = None, gain: Optional[int] = None, temp: Optional[int] = None,
-              brightness: Optional[int] = None):
+              brightness: Optional[int] = None) -> dict[str, Any]:
         raise NotImplementedError("Unavailable")
 
-    def emeter(self, index: int):
+    def emeter(self, index: int) -> dict[str, Any]:
         raise NotImplementedError("Unavailable")

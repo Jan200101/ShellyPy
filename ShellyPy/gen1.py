@@ -64,7 +64,7 @@ class ShellyGen1(ShellyBase):
             except (BadLogin, NotFound, BadResponse):
                 break
 
-    def post(self, page: str, values: Optional[dict[str, Any]] = None):
+    def post(self, page: str, values: Optional[dict[str, Any]] = None) -> dict[str, Any]:
         """
         @brief      returns settings
 
@@ -94,7 +94,7 @@ class ShellyGen1(ShellyBase):
         except JSONDecodeError:
             raise BadResponse("Bad JSON")
 
-    def status(self):
+    def status(self) -> dict[str, Any]:
         """
         @brief      returns status response
 
@@ -102,7 +102,7 @@ class ShellyGen1(ShellyBase):
         """
         return self.post("status")
 
-    def settings(self, subpage = None):
+    def settings(self, subpage = None) -> dict[str, Any]:
         """
         @brief      returns settings
 
@@ -116,7 +116,7 @@ class ShellyGen1(ShellyBase):
 
         return self.post(page)
 
-    def meter(self, index: int):
+    def meter(self, index: int) -> dict[str, Any]:
         """
         @brief      Get meter information from a relay at the given index
 
@@ -126,7 +126,7 @@ class ShellyGen1(ShellyBase):
 
         return self.post(f"meter/{index}")
 
-    def relay(self, index, *args, **kwargs):
+    def relay(self, index, *args, **kwargs) -> dict[str, Any]:
         """
         @brief      Interacts with a relay at the given index
 
@@ -152,7 +152,7 @@ class ShellyGen1(ShellyBase):
         return self.post(f"relay/{index}", values)
 
     def roller(self, index: int, go: Optional[str] = None,
-               roller_pos: Optional[int] = None, duration: Optional[int] = None):
+               roller_pos: Optional[int] = None, duration: Optional[int] = None) -> dict[str, Any]:
         """
         @brief      Interacts with a roller at a given index
 
@@ -179,7 +179,7 @@ class ShellyGen1(ShellyBase):
     def light(self, index: int, mode: Optional[str] = None, timer: Optional[int] = None, turn: Optional[bool] = None,
               red: Optional[int] = None, green: Optional[int] = None, blue: Optional[int] = None,
               white: Optional[int] = None, gain: Optional[int] =  None, temp: Optional[int] = None,
-              brightness: Optional[int] = None):
+              brightness: Optional[int] = None) -> dict[str, Any]:
         """
         @brief      Interacts with lights at a given index
 
@@ -233,7 +233,7 @@ class ShellyGen1(ShellyBase):
 
         return self.post(f"light/{index}", values)
 
-    def emeter(self, index: int):
+    def emeter(self, index: int) -> dict[str, Any]:
         return self.post(f"emeter/{index}")
 
 # backwards compatibility with old code
