@@ -25,14 +25,14 @@ class ShellyGen1(ShellyBase):
         super().__init__(ip=ip, port=port, timeout=timeout, login=login, debug=debug, init=init)
         self._generation: int = 1
 
-        self.relays: list = []
-        self.rollers: list = []
-        self.lights: list = []
+        self.relays: list[dict[str, Any]] = []
+        self.rollers: list[dict[str, Any]] = []
+        self.lights: list[dict[str, Any]] = []
 
-        self.irs = None
+        self.ir_sense: str = "Unknown"
 
-        self.emeters: list = []
-        self.meters: list[dict] = []
+        self.emeters: list[dict[str, Any]] = []
+        self.meters: list[dict[str, Any]] = []
 
     def update(self) -> None:
         """
@@ -49,7 +49,7 @@ class ShellyGen1(ShellyBase):
         # RGBW reuses the same lights array
         self.lights = status.get("lights", [])
 
-        self.irs = status.get("light_sensor", None)
+        self.ir_sense = status.get("light_sensor", "Unknown")
 
         self.emeters = status.get("emeter", [])
 
