@@ -28,7 +28,8 @@ class ShellyGen2(ShellyBase):
     def update(self) -> None:
         status = self.settings()
 
-        self._name = status["device"].get("name", self._name)
+        name: Optional[str] = status["device"].get("name", self._name)
+        self._name = name if name is not None else "Device name not yet set!"
         self._type = status["device"].get("mac", self._type)
 
     def post(self, page: str, values: Optional[dict[str, Any]] = None):
