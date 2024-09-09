@@ -68,7 +68,8 @@ class ShellyGen1(ShellyBase):
         """
         @brief      returns settings
 
-        @param      page    page to be accessed. Use the Shelly HTTP API Reference to see what's possible
+        @param      page    the page to be accessed. Use the Shelly HTTP API Reference to see what's possible
+        @param      values  dict of values to send in the body of the request
         @return     returns json response
         """
 
@@ -120,7 +121,7 @@ class ShellyGen1(ShellyBase):
         """
         @brief      Get meter information from a relay at the given index
 
-        @param      index  index of the relay
+        @param      index  the index of the relay
         @return     returns attributes of meter: power, overpower, is_valid, timestamp, counters, total
         """
 
@@ -130,7 +131,7 @@ class ShellyGen1(ShellyBase):
         """
         @brief      Interacts with a relay at the given index
 
-        @param      index  index of the relay
+        @param      index  the index of the relay
         @param      turn   Will turn the relay on or off
         @param      timer  a one-shot flip-back timer in seconds
         """
@@ -156,8 +157,8 @@ class ShellyGen1(ShellyBase):
         """
         @brief      Interacts with a roller at a given index
 
-        @param      self        The object
-        @param      index       index of the roller. When in doubt use 0
+        @param      self        the object
+        @param      index       the index of the roller. When in doubt use 0
         @param      go          way of the roller to go. Accepted are "open", "close", "stop", "to_pos"
         @param      roller_pos  the wanted position in percent
         @param      duration    how long it will take to get to that position
@@ -183,17 +184,17 @@ class ShellyGen1(ShellyBase):
         """
         @brief      Interacts with lights at a given index
 
-        @param      index       index of the light. When in doubt use 0
-        @param      mode        Accepts "white" and "color" as possible modes
+        @param      index       the index of the light. When in doubt use 0
+        @param      mode        accepts "white" and "color" as possible modes
         @param      timer       a one-shot flip-back timer in seconds
-        @param      turn        Will turn the lights on or off
-        @param      red         Red brightness, 0..255, only works if mode="color"
-        @param      green       Green brightness, 0..255, only works if mode="color"
-        @param      blue        Blue brightness, 0..255, only works if mode="color"
-        @param      white       White brightness, 0..255, only works if mode="color"
-        @param      gain        Gain for all channels, 0...100, only works if mode="color"
-        @param      temp        Color temperature in K, 3000..6500, only works if mode="white"
-        @param      brightness  Brightness, 0..100, only works if mode="white"
+        @param      turn        will turn the lights on or off
+        @param      red         brightness of red, 0..255, only works if mode="color"
+        @param      green       brightness of green, 0..255, only works if mode="color"
+        @param      blue        brightness of blue, 0..255, only works if mode="color"
+        @param      white       brightness of white, 0..255, only works if mode="color"
+        @param      gain        the gain for all channels, 0...100, only works if mode="color"
+        @param      temp        color temperature in K, 3000..6500, only works if mode="white"
+        @param      brightness  the brightness, 0..100, only works if mode="white"
         """
 
         values: dict[str, Any] = {}
