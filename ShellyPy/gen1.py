@@ -38,10 +38,10 @@ class ShellyGen1(ShellyBase):
         """
         @brief update the Shelly attributes
         """
-        status = self.settings()
+        status: dict[str, Any] = self.settings()
 
-        self._name = status['device'].get("hostname", self._name)
-        self._type = status['device'].get("type", self._type)
+        self._name: str = status['device'].get("hostname", self._name)
+        self._type: str = status['device'].get("type", self._type)
 
         # Settings are already fetched to get device information might as well put the list of things the device has somewhere
         self.relays = status.get("relays", [])
@@ -103,7 +103,7 @@ class ShellyGen1(ShellyBase):
         """
         return self.post("status")
 
-    def settings(self, subpage = None) -> dict[str, Any]:
+    def settings(self, subpage: Optional[str] = None) -> dict[str, Any]:
         """
         @brief      returns settings
 

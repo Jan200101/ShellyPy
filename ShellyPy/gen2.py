@@ -83,7 +83,7 @@ class ShellyGen2(ShellyBase):
     def status(self) -> dict[str, Any]:
         return self.post("Sys.GetStatus")
 
-    def settings(self, subpage = None) -> dict[str, Any]:
+    def settings(self, subpage: Optional[str] = None) -> dict[str, Any]:
         return self.post("Sys.GetConfig")
 
     def meter(self, index: int) -> dict[str, Any]:

@@ -81,7 +81,7 @@ class ShellyBase:
         ...
 
     @abstractmethod
-    def settings(self, subpage = None) -> dict[str, Any]:
+    def settings(self, subpage: Optional[str] = None) -> dict[str, Any]:
         ...
 
     @abstractmethod
