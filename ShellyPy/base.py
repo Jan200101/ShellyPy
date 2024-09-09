@@ -73,7 +73,7 @@ class ShellyBase:
         ...
 
     @abstractmethod
-    def post(self, page: str, values = None):
+    def post(self, page: str, values: Optional[dict[str, Any]] = None):
         ...
 
     @abstractmethod
@@ -93,13 +93,17 @@ class ShellyBase:
         ...
 
     @abstractmethod
-    def roller(self, index, *args, **kwargs):
+    def roller(self, index: int, go: Optional[str] = None,
+               roller_pos: Optional[int] = None, duration: Optional[int] = None):
         ...
 
     @abstractmethod
-    def light(self, index, *args, **kwargs):
+    def light(self, index: int, mode: Optional[str] = None, timer: Optional[int] = None, turn: Optional[bool] = None,
+              red: Optional[int] = None, green: Optional[int] = None, blue: Optional[int] = None,
+              white: Optional[int] = None, gain: Optional[int] = None, temp: Optional[int] = None,
+              brightness: Optional[int] = None):
         ...
 
     @abstractmethod
-    def emeter(self, index, *args, **kwargs):
+    def emeter(self, index: int):
         ...

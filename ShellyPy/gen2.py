@@ -31,7 +31,7 @@ class ShellyGen2(ShellyBase):
         self._name = status["device"].get("name", self._name)
         self._type = status["device"].get("mac", self._type)
 
-    def post(self, page: str, values = None):
+    def post(self, page: str, values: Optional[dict[str, Any]] = None):
         url = f"{self._proto}://{self._hostname}:{self._port}/rpc"
 
         # increment payload id globally
@@ -39,11 +39,7 @@ class ShellyGen2(ShellyBase):
         # but keep a local copy around so we face no race conditions
         payload_id = self.payload_id
 
-        payload = {
-            "jsonrpc": "2.0",
-            "id": payload_id,
-            "method": page,
-        }
+        payload: dict[str, Any] = {"jsonrpc": "2.0", "id": payload_id, "method": page}
 
         if values:
             payload["params"] = values
@@ -54,9 +50,7 @@ class ShellyGen2(ShellyBase):
         except IndexError:
             pass
 
-        response = post(url, auth=credentials,
-                        json=payload,
-                        timeout=self._timeout)
+        response: Response = post(url, auth=credentials, json=payload, timeout=self._timeout)
 
         if response.status_code == 401:
             raise BadLogin()
@@ -117,11 +111,8 @@ class ShellyGen2(ShellyBase):
 
         return self.post(method, values)
 
-    def roller(self, index, *args, **kwargs):
-
-        go = kwargs.get("go", None)
-        roller_pos = kwargs.get("roller_pos", None)
-        duration = kwargs.get("duration", None)
+    def roller(self, index: int, go: Optional[str] = None,
+               roller_pos: Optional[int] = None, duration: Optional[int] = None):
 
         method: str = ""
         values: dict[str, Any] = {
@@ -147,8 +138,11 @@ class ShellyGen2(ShellyBase):
 
         return self.post(method, values)
 
-    def light(self, index, *args, **kwargs):
+    def light(self, index: int, mode: Optional[str] = None, timer: Optional[int] = None, turn: Optional[bool] = None,
+              red: Optional[int] = None, green: Optional[int] = None, blue: Optional[int] = None,
+              white: Optional[int] = None, gain: Optional[int] = None, temp: Optional[int] = None,
+              brightness: Optional[int] = None):
         raise NotImplementedError("Unavailable")
 
-    def emeter(self, index, *args, **kwargs):
+    def emeter(self, index: int):
         raise NotImplementedError("Unavailable")

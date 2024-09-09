@@ -2,6 +2,7 @@ from typing import Optional
 from json.decoder import JSONDecodeError
 
 from requests import post
+from requests import Response
 from requests.auth import HTTPBasicAuth
 
 from .error import BadLogin, NotFound, BadResponse
@@ -60,15 +61,14 @@ class ShellyGen1(ShellyBase):
                 # Request meter information
                 self.meters.append(self.meter(meter_index))
                 meter_index += 1
-            except Exception:
+            except (BadLogin, NotFound, BadResponse):
                 break
 
-    def post(self, page: str, values = None):
+    def post(self, page: str, values: Optional[dict[str, Any]] = None):
         """
         @brief      returns settings
 
         @param      page    page to be accessed. Use the Shelly HTTP API Reference to see what's possible
-
         @return     returns json response
         """
 
@@ -82,8 +82,7 @@ class ShellyGen1(ShellyBase):
 
         credentials = HTTPBasicAuth(*self._credentials)
 
-        response = post(url, auth=credentials,
-                        timeout=self._timeout)
+        response: Response = post(url, auth=credentials, timeout=self._timeout)
 
         if response.status_code == 401:
             raise BadLogin()
@@ -108,13 +107,12 @@ class ShellyGen1(ShellyBase):
         @brief      returns settings
 
         @param      subpage page to be accessed. Use the Shelly HTTP API Reference to see what's possible
-
         @return     returns settings as a dict
         """
 
         page = "settings"
         if subpage:
-            page += "/" + subpage
+            page += f"/{subpage}"
 
         return self.post(page)
 
@@ -137,7 +135,7 @@ class ShellyGen1(ShellyBase):
         @param      timer  a one-shot flip-back timer in seconds
         """
 
-        values = {}
+        values: dict[str, Any] = {}
 
         turn = kwargs.get("turn", None)
         timer = kwargs.get("timer", None)
@@ -153,7 +151,8 @@ class ShellyGen1(ShellyBase):
 
         return self.post(f"relay/{index}", values)
 
-    def roller(self, index, *args, **kwargs):
+    def roller(self, index: int, go: Optional[str] = None,
+               roller_pos: Optional[int] = None, duration: Optional[int] = None):
         """
         @brief      Interacts with a roller at a given index
 
@@ -164,13 +163,9 @@ class ShellyGen1(ShellyBase):
         @param      duration    how long it will take to get to that position
         """
 
-        go = kwargs.get("go", None)
-        roller_pos = kwargs.get("roller_pos", None)
-        duration = kwargs.get("duration", None)
+        values: dict[str, Any] = {}
 
-        values = {}
-
-        if go:
+        if go is not None:
             values["go"] = go
 
         if roller_pos is not None:
@@ -181,12 +176,15 @@ class ShellyGen1(ShellyBase):
 
         return self.post(f"roller/{index}", values)
 
-    def light(self, index, *args, **kwargs):
+    def light(self, index: int, mode: Optional[str] = None, timer: Optional[int] = None, turn: Optional[bool] = None,
+              red: Optional[int] = None, green: Optional[int] = None, blue: Optional[int] = None,
+              white: Optional[int] = None, gain: Optional[int] =  None, temp: Optional[int] = None,
+              brightness: Optional[int] = None):
         """
         @brief      Interacts with lights at a given index
 
-        @param      mode        Accepts "white" and "color" as possible modes
         @param      index       index of the light. When in doubt use 0
+        @param      mode        Accepts "white" and "color" as possible modes
         @param      timer       a one-shot flip-back timer in seconds
         @param      turn        Will turn the lights on or off
         @param      red         Red brightness, 0..255, only works if mode="color"
@@ -197,18 +195,8 @@ class ShellyGen1(ShellyBase):
         @param      temp        Color temperature in K, 3000..6500, only works if mode="white"
         @param      brightness  Brightness, 0..100, only works if mode="white"
         """
-        mode = kwargs.get("mode", None)
-        timer = kwargs.get("timer", None)
-        turn = kwargs.get("turn", None)
-        red = kwargs.get("red", None)
-        green = kwargs.get("green", None)
-        blue = kwargs.get("blue", None)
-        white = kwargs.get("white", None)
-        gain = kwargs.get("gain", None)
-        temp = kwargs.get("temp", None)
-        brightness = kwargs.get("brightness", None)
 
-        values = {}
+        values: dict[str, Any] = {}
 
         if mode:
             values["mode"] = mode
@@ -245,8 +233,7 @@ class ShellyGen1(ShellyBase):
 
         return self.post(f"light/{index}", values)
 
-    def emeter(self, index, *args, **kwargs):
-
+    def emeter(self, index: int):
         return self.post(f"emeter/{index}")
 
 # backwards compatibility with old code
