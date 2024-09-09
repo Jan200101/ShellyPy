@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 from json.decoder import JSONDecodeError
 
 from requests import post
@@ -40,8 +40,8 @@ class ShellyGen1(ShellyBase):
         """
         status = self.settings()
 
-        self._type = status['device'].get("type", self._type)
         self._name = status['device'].get("hostname", self._name)
+        self._type = status['device'].get("type", self._type)
 
         # Settings are already fetched to get device information might as well put the list of things the device has somewhere
         self.relays = status.get("relays", [])

@@ -1,7 +1,8 @@
-from typing import Optional
+from typing import Any, Optional
 from json.decoder import JSONDecodeError
 
 from requests import post
+from requests import Response
 from requests.auth import HTTPDigestAuth
 
 from .error import BadLogin, NotFound, BadResponse
@@ -29,8 +30,8 @@ class ShellyGen2(ShellyBase):
         status = self.settings()
 
         name: Optional[str] = status["device"].get("name", self._name)
-        self._name = name if name is not None else "Device name not yet set!"
-        self._type = status["device"].get("mac", self._type)
+        self._name: str = name if name is not None else "Device name not yet set!"
+        self._type: str = status["device"].get("mac", self._type)
 
     def post(self, page: str, values: Optional[dict[str, Any]] = None):
         url = f"{self._proto}://{self._hostname}:{self._port}/rpc"
