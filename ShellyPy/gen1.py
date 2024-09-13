@@ -6,21 +6,16 @@ from requests import Response
 from requests.auth import HTTPBasicAuth
 
 from .error import BadLogin, NotFound, BadResponse
-from .base import ShellyBase
+from .base import _ShellyBase
 
 
-class ShellyGen1(ShellyBase):
+class ShellyGen1(_ShellyBase):
+    """
+    Implements a general Class for interaction with Shelly devices of generation 1
+    """
 
     def __init__(self, ip: str, port: int = 80, timeout: int = 5,
                  login: Optional[dict[str, str]] = None, debug: bool = False, init: bool = False) -> None:
-        """
-        @param      ip      the target IP of the shelly device. Can be a string, list of strings or list of integers
-        @param      port    target port, may be useful for non Shelly devices that have the same HTTP Api
-        @param      login   dict of login credentials. Keys needed are "username" and "password"
-        @param      timeout specify the amount of time until requests are aborted.
-        @param      debug   enable debug printing
-        @param      init    calls the update method on init
-        """
 
         super().__init__(ip=ip, port=port, timeout=timeout, login=login, debug=debug, init=init)
         self._generation: int = 1
@@ -35,9 +30,7 @@ class ShellyGen1(ShellyBase):
         self.meters: list[dict[str, Any]] = []
 
     def update(self) -> None:
-        """
-        @brief update the Shelly attributes
-        """
+
         status: dict[str, Any] = self.settings()
 
         self._name: str = status['device'].get("hostname", self._name)
@@ -65,13 +58,6 @@ class ShellyGen1(ShellyBase):
                 break
 
     def post(self, page: str, values: Optional[dict[str, Any]] = None) -> dict[str, Any]:
-        """
-        @brief      returns settings
-
-        @param      page    the page to be accessed. Use the Shelly HTTP API Reference to see what's possible
-        @param      values  dict of values to send in the body of the request
-        @return     returns json response
-        """
 
         url: str = f"{self._proto}://{self._hostname}:{self._port}/{page}?"
 
@@ -96,20 +82,9 @@ class ShellyGen1(ShellyBase):
             raise BadResponse("Bad JSON")
 
     def status(self) -> dict[str, Any]:
-        """
-        @brief      returns status response
-
-        @return     status dict
-        """
         return self.post("status")
 
     def settings(self, subpage: Optional[str] = None) -> dict[str, Any]:
-        """
-        @brief      returns settings
-
-        @param      subpage page to be accessed. Use the Shelly HTTP API Reference to see what's possible
-        @return     returns settings as a dict
-        """
 
         page: str = "settings"
         if subpage:
@@ -118,23 +93,9 @@ class ShellyGen1(ShellyBase):
         return self.post(page)
 
     def meter(self, index: int) -> dict[str, Any]:
-        """
-        @brief      Get meter information from a relay at the given index
-
-        @param      index  the index of the relay
-        @return     returns attributes of meter: power, overpower, is_valid, timestamp, counters, total
-        """
-
         return self.post(f"meter/{index}")
 
     def relay(self, index: int, timer: float = 0.0, turn: Optional[bool] = None)  -> dict[str, Any]:
-        """
-        @brief      Interacts with a relay at the given index
-
-        @param      index  the index of the relay
-        @param      turn   Will turn the relay on or off
-        @param      timer  a one-shot flip-back timer in seconds
-        """
 
         values: dict[str, Any] = {}
 
@@ -151,15 +112,6 @@ class ShellyGen1(ShellyBase):
 
     def roller(self, index: int, go: Optional[str] = None,
                roller_pos: Optional[int] = None, duration: Optional[int] = None) -> dict[str, Any]:
-        """
-        @brief      Interacts with a roller at a given index
-
-        @param      self        the object
-        @param      index       the index of the roller. When in doubt use 0
-        @param      go          way of the roller to go. Accepted are "open", "close", "stop", "to_pos"
-        @param      roller_pos  the wanted position in percent
-        @param      duration    how long it will take to get to that position
-        """
 
         values: dict[str, Any] = {}
 
@@ -178,21 +130,6 @@ class ShellyGen1(ShellyBase):
               red: Optional[int] = None, green: Optional[int] = None, blue: Optional[int] = None,
               white: Optional[int] = None, gain: Optional[int] =  None, temp: Optional[int] = None,
               brightness: Optional[int] = None) -> dict[str, Any]:
-        """
-        @brief      Interacts with lights at a given index
-
-        @param      index       the index of the light. When in doubt use 0
-        @param      mode        accepts "white" and "color" as possible modes
-        @param      timer       a one-shot flip-back timer in seconds
-        @param      turn        will turn the lights on or off
-        @param      red         brightness of red, 0..255, only works if mode="color"
-        @param      green       brightness of green, 0..255, only works if mode="color"
-        @param      blue        brightness of blue, 0..255, only works if mode="color"
-        @param      white       brightness of white, 0..255, only works if mode="color"
-        @param      gain        the gain for all channels, 0...100, only works if mode="color"
-        @param      temp        color temperature in K, 3000..6500, only works if mode="white"
-        @param      brightness  the brightness, 0..100, only works if mode="white"
-        """
 
         values: dict[str, Any] = {}
 

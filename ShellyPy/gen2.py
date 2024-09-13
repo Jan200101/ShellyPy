@@ -6,27 +6,23 @@ from requests import Response
 from requests.auth import HTTPDigestAuth
 
 from .error import BadLogin, NotFound, BadResponse
-from .base import ShellyBase
+from .base import _ShellyBase
 
 
-class ShellyGen2(ShellyBase):
+class ShellyGen2(_ShellyBase):
+    """
+    Implements a general Class for interaction with Shelly devices of generation 2
+    """
 
     def __init__(self, ip: str, port: int = 80, timeout: int = 5,
                  login: Optional[dict[str, str]] = None, debug: bool = False, init: bool = False) -> None:
-        """
-        @param      ip      the target IP of the shelly device. Can be a string, list of strings or list of integers
-        @param      port        target port, may be useful for non Shelly devices that have the same HTTP Api
-        @param      login   dict of login credentials. Keys needed are "username" and "password"
-        @param      timeout specify the amount of time until requests are aborted.
-        @param      debug   enable debug printing
-        @param      init    calls the update method on init
-        """
 
         super().__init__(ip=ip, port=port, timeout=timeout, login=login, debug=debug, init=init)
         self.payload_id: int = 1
         self._generation: int = 2
 
     def update(self) -> None:
+
         status = self.settings()
 
         name: Optional[str] = status["device"].get("name", self._name)
@@ -34,6 +30,7 @@ class ShellyGen2(ShellyBase):
         self._type: str = status["device"].get("mac", self._type)
 
     def post(self, page: str, values: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+
         url: str = f"{self._proto}://{self._hostname}:{self._port}/rpc"
 
         # increment payload id globally
