@@ -1,43 +1,40 @@
-from sys import version_info
-
-if version_info.major == 3:
-    from json.decoder import JSONDecodeError
-else:
-    JSONDecodeError = ValueError
-
+from typing import Any, Optional
+from json.decoder import JSONDecodeError
 
 from requests import post
+from requests import Response
 from requests.auth import HTTPBasicAuth
 
 from .error import BadLogin, NotFound, BadResponse
+from .base import _ShellyBase
 
-from .base import ShellyBase
 
-class ShellyGen1(ShellyBase):
+class ShellyGen1(_ShellyBase):
+    """
+    Implements a general Class for interaction with Shelly devices of generation 1
+    """
 
-    def __init__(self, ip, port = "80", *args, **kwargs):
-        """
-        @param      ip      the target IP of the shelly device. Can be a string, list of strings or list of integers
-        @param      port    target port, may be useful for non Shelly devices that have the same HTTP Api
-        @param      login   dict of login credentials. Keys needed are "username" and "password"
-        @param      timeout specify the amount of time until requests are aborted.
-        @param      debug   enable debug printing
-        @param      init    calls the update method on init
-        """
+    def __init__(self, ip: str, port: int = 80, timeout: int = 5,
+                 login: Optional[dict[str, str]] = None, debug: bool = False, init: bool = False) -> None:
 
-        super().__init__(ip, port, *args, **kwargs)
-        self.__generation__ = 1
+        super().__init__(ip=ip, port=port, timeout=timeout, login=login, debug=debug, init=init)
+        self._generation: int = 1
 
-    def update(self):
-        """
-        @brief update the Shelly attributes
+        self.relays: list[dict[str, Any]] = []
+        self.rollers: list[dict[str, Any]] = []
+        self.lights: list[dict[str, Any]] = []
 
-        @param     index  index of the relay
-        """
-        status = self.settings()
+        self.ir_sense: str = "Unknown"
 
-        self.__type__ = status['device'].get("type", self.__type__)
-        self.__name__ = status['device'].get("hostname", self.__name__)
+        self.emeters: list[dict[str, Any]] = []
+        self.meters: list[dict[str, Any]] = []
+
+    def update(self) -> None:
+
+        status: dict[str, Any] = self.settings()
+
+        self._name: str = status['device'].get("hostname", self._name)
+        self._type: str = status['device'].get("type", self._type)
 
         # Settings are already fetched to get device information might as well put the list of things the device has somewhere
         self.relays = status.get("relays", [])
@@ -45,7 +42,7 @@ class ShellyGen1(ShellyBase):
         # RGBW reuses the same lights array
         self.lights = status.get("lights", [])
 
-        self.irs = status.get("light_sensor", None)
+        self.ir_sense = status.get("light_sensor", "Unknown")
 
         self.emeters = status.get("emeter", [])
 
@@ -55,35 +52,24 @@ class ShellyGen1(ShellyBase):
         while True:
             try:
                 # Request meter information
-                self.meter.append(self.meter(meter_index))
+                self.meters.append(self.meter(meter_index))
                 meter_index += 1
-            except:
+            except (BadLogin, NotFound, BadResponse):
                 break
 
-    def post(self, page, values = None):
-        """
-        @brief      returns settings
+    def post(self, page: str, values: Optional[dict[str, Any]] = None) -> dict[str, Any]:
 
-        @param      page   page to be accesed. Use the Shelly HTTP API Reference to see whats possible
-
-        @return     returns json response
-        """
-
-        url = "{}://{}:{}/{}?".format(self.__PROTOCOL__, self.__ip__, self.__port__, page)
+        url: str = f"{self._proto}://{self._hostname}:{self._port}/{page}?"
 
         if values:
-            url += "&".join(["{}={}".format(key, value) for key, value in values.items()])
+            url += "&".join([f"{key}={value}" for key, value in values.items()])
 
-        if self.__debugging__:
-            print("Target Adress: {}\n"
-                  "Authentication: {}\n"
-                  "Timeout: {}"
-                  "".format(url, any(self.__credentials__), self.__timeout__))
+        if self._debugging:
+            print(f"Target Address: {url}\nAuthentication: {any(self._credentials)}\nTimeout: {self._timeout}")
 
-        credentials = HTTPBasicAuth(*self.__credentials__)
+        credentials = HTTPBasicAuth(*self._credentials)
 
-        response = post(url, auth=credentials,
-                        timeout=self.__timeout__)
+        response: Response = post(url, auth=credentials, timeout=self._timeout)
 
         if response.status_code == 401:
             raise BadLogin()
@@ -95,52 +81,23 @@ class ShellyGen1(ShellyBase):
         except JSONDecodeError:
             raise BadResponse("Bad JSON")
 
-    def status(self):
-        """
-        @brief      returns status response
-
-        @return     status dict
-        """
+    def status(self) -> dict[str, Any]:
         return self.post("status")
 
-    def settings(self, subpage = None):
-        """
-        @brief      returns settings
+    def settings(self, subpage: Optional[str] = None) -> dict[str, Any]:
 
-        @param      page   page to be accesed. Use the Shelly HTTP API Reference to see whats possible
-
-        @return     returns settings as a dict
-        """
-
-        page = "settings"
+        page: str = "settings"
         if subpage:
-            page += "/" + subpage
+            page += f"/{subpage}"
 
         return self.post(page)
 
-    def meter(self, index):
-        """
-        @brief      Get meter information from a relay at the given index
+    def meter(self, index: int) -> dict[str, Any]:
+        return self.post(f"meter/{index}")
 
-        @param      index  index of the relay
-        @return     returns attributes of meter: power, overpower, is_valid, timestamp, counters, total
-        """
+    def relay(self, index: int, timer: float = 0.0, turn: Optional[bool] = None)  -> dict[str, Any]:
 
-        return self.post("meter/{}".format(index))
-
-    def relay(self, index, *args, **kwargs):
-        """
-        @brief      Interacts with a relay at the given index
-
-        @param      index  index of the relay
-        @param      turn   Will turn the relay on or off
-        @param      timer  a one-shot flip-back timer in seconds
-        """
-
-        values = {}
-
-        turn = kwargs.get("turn", None)
-        timer = kwargs.get("timer", None)
+        values: dict[str, Any] = {}
 
         if turn is not None:
             if turn:
@@ -148,67 +105,33 @@ class ShellyGen1(ShellyBase):
             else:
                 values["turn"] = "off"
 
-        if timer:
+        if timer > 0.0:
             values["timer"] = timer
 
-        return self.post("relay/{}".format(index), values)
+        return self.post(f"relay/{index}", values)
 
-    def roller(self, index, *args, **kwargs):
-        """
-        @brief      Interacts with a roller at a given index
+    def roller(self, index: int, go: Optional[str] = None,
+               roller_pos: Optional[int] = None, duration: Optional[int] = None) -> dict[str, Any]:
 
-        @param      self        The object
-        @param      index       index of the roller. When in doubt use 0
-        @param      go          way of the roller to go. Accepted are "open", "close", "stop", "to_pos"
-        @param      roller_pos  the wanted position in percent
-        @param      duration    how long it will take to get to that position
-        """
+        values: dict[str, Any] = {}
 
-        go = kwargs.get("go", None)
-        roller_pos = kwargs.get("roller_pos", None)
-        duration = kwargs.get("duration", None)
-
-        values = {}
-
-        if go:
+        if go is not None:
             values["go"] = go
 
         if roller_pos is not None:
-            values["roller_pos"] = self.__clamp_percentage__(roller_pos)
+            values["roller_pos"] = self._clamp_percentage(roller_pos)
 
         if duration is not None:
             values["duration"] = duration
 
-        return self.post("roller/{}".format(index), values)
+        return self.post(f"roller/{index}", values)
 
-    def light(self, index, *args, **kwargs):
-        """
-        @brief      Interacts with lights at a given index
+    def light(self, index: int, mode: Optional[str] = None, timer: Optional[int] = None, turn: Optional[bool] = None,
+              red: Optional[int] = None, green: Optional[int] = None, blue: Optional[int] = None,
+              white: Optional[int] = None, gain: Optional[int] =  None, temp: Optional[int] = None,
+              brightness: Optional[int] = None) -> dict[str, Any]:
 
-        @param      mode        Accepts "white" and "color" as possible modes
-        @param      index       index of the light. When in doubt use 0
-        @param      timer       a one-shot flip-back timer in seconds
-        @param      turn        Will turn the lights on or off
-        @param      red         Red brightness, 0..255, only works if mode="color"
-        @param      green       Green brightness, 0..255, only works if mode="color"
-        @param      blue        Blue brightness, 0..255, only works if mode="color"
-        @param      white       White brightness, 0..255, only works if mode="color"
-        @param      gain        Gain for all channels, 0...100, only works if mode="color"
-        @param      temp        Color temperature in K, 3000..6500, only works if mode="white"
-        @param      brightness  Brightness, 0..100, only works if mode="white"
-        """
-        mode = kwargs.get("mode", None)
-        timer = kwargs.get("timer", None)
-        turn = kwargs.get("turn", None)
-        red = kwargs.get("red", None)
-        green = kwargs.get("green", None)
-        blue = kwargs.get("blue", None)
-        white = kwargs.get("white", None)
-        gain = kwargs.get("gain", None)
-        temp = kwargs.get("temp", None)
-        brightness = kwargs.get("brightness", None)
-
-        values = {}
+        values: dict[str, Any] = {}
 
         if mode:
             values["mode"] = mode
@@ -223,31 +146,30 @@ class ShellyGen1(ShellyBase):
                 values["turn"] = "off"
 
         if red is not None:
-            values["red"] = self.__clamp__(red)
+            values["red"] = self._clamp(red)
 
         if green is not None:
-            values["green"] = self.__clamp__(green)
+            values["green"] = self._clamp(green)
 
         if blue is not None:
-            values["blue"] = self.__clamp__(blue)
+            values["blue"] = self._clamp(blue)
 
         if white is not None:
-            values["white"] = self.__clamp__(white)
+            values["white"] = self._clamp(white)
 
         if gain is not None:
-            values["gain"] = self.__clamp_percentage__(gain)
+            values["gain"] = self._clamp_percentage(gain)
 
         if temp is not None:
-            values["temp"] = self.__clamp_kalvin__(temp)
+            values["temp"] = self._clamp_kelvin(temp)
 
         if brightness is not None:
-            values["brightness"] = self.__clamp_percentage__(brightness)
+            values["brightness"] = self._clamp_percentage(brightness)
 
-        return self.post("light/{}".format(index), values)
+        return self.post(f"light/{index}", values)
 
-    def emeter(self, index, *args, **kwargs):
-
-        return self.post("emeter/{}".format(index))
+    def emeter(self, index: int) -> dict[str, Any]:
+        return self.post(f"emeter/{index}")
 
 # backwards compatibility with old code
 Shelly = ShellyGen1
