@@ -7,14 +7,13 @@ else:
 
 from requests import get
 
-from .error import BadLogin, NotFound, BadResponse
-
+from .error import BadLogin, BadResponse, NotFound
 from .gen1 import ShellyGen1
 from .gen2 import ShellyGen2
 
-class Shelly():
 
-    def __init__(self, ip, port = "80", *args, **kwargs):
+class Shelly:
+    def __init__(self, ip, port="80", *args, **kwargs):
         """
         @param      ip      the target IP of the shelly device. Can be a string, list of strings or list of integers
         @param      port        target port, may be useful for non Shelly devices that have the same HTTP Api
@@ -42,10 +41,11 @@ class Shelly():
             raise BadResponse("Bad JSON")
 
         gen = response_data.get("gen", 1)
-        
+
         if gen == 1:
             return ShellyGen1
-        elif gen == 2:
+        elif gen >= 2:
+            # Shelly API is the same for Gen2, Gen3 and Gen4
             return ShellyGen2
         else:
             raise ValueError("Generation {} not supported".format(gen))
